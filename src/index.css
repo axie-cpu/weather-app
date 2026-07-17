@@ -1,0 +1,124 @@
+:root {
+  --bg0: #070b14;
+  --bg1: #0c1424;
+  --bg2: #152238;
+  --bg3: #1e3a5f;
+  --glow: #5eb0ff;
+  --glow2: #a78bfa;
+  --text: #f7f9fc;
+  --muted: rgba(247, 249, 252, 0.58);
+  --faint: rgba(247, 249, 252, 0.1);
+  --glass: rgba(255, 255, 255, 0.055);
+  --glass-hi: rgba(255, 255, 255, 0.09);
+  --stroke: rgba(255, 255, 255, 0.12);
+  --stroke-hi: rgba(255, 255, 255, 0.22);
+  --accent: #9fd0ff;
+  --danger: #ff9b9b;
+  --r: 22px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: Outfit, system-ui, sans-serif;
+  color: var(--text);
+  background: var(--bg0);
+  overflow: hidden;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100dvh;
+  min-height: 100svh;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: 0;
+  background: none;
+}
+
+/* Themes */
+body.theme-clear-day {
+  --bg0: #0e2a52;
+  --bg1: #1a4d8c;
+  --bg2: #3d86c9;
+  --bg3: #7eb8ef;
+  --glow: #ffd27a;
+  --glow2: #7ec8ff;
+}
+body.theme-clear-night {
+  --bg0: #04060f;
+  --bg1: #0a1024;
+  --bg2: #141f3d;
+  --bg3: #1c2a52;
+  --glow: #6b8cff;
+  --glow2: #c4b5fd;
+}
+body.theme-clouds {
+  --bg0: #121820;
+  --bg1: #1c2736;
+  --bg2: #334155;
+  --bg3: #5a6f88;
+  --glow: #94a3b8;
+  --glow2: #a5b4c8;
+}
+body.theme-rain {
+  --bg0: #0a121c;
+  --bg1: #132433;
+  --bg2: #1e3a4f;
+  --bg3: #2d5570;
+  --glow: #5b9ec9;
+  --glow2: #64748b;
+}
+body.theme-storm {
+  --bg0: #06070e;
+  --bg1: #101528;
+  --bg2: #1a2040;
+  --bg3: #2a3060;
+  --glow: #818cf8;
+  --glow2: #c084fc;
+}
+body.theme-snow {
+  --bg0: #121a26;
+  --bg1: #243447;
+  --bg2: #4a627a;
+  --bg3: #8fa8c0;
+  --glow: #e2e8f0;
+  --glow2: #93c5fd;
+}
+body.theme-fog {
+  --bg0: #1a1d24;
+  --bg1: #2d3340;
+  --bg2: #4b5563;
+  --bg3: #8b95a5;
+  --glow: #cbd5e1;
+  --glow2: #94a3b8;
+}
