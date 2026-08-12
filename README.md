@@ -36,3 +36,29 @@ npm run dev
 ```
 
 `npm run build` writes the production site (and the widget zip) to the repo root for GitHub Pages.
+
+## Changelog
+
+### 1.2.0 — 2026-08-12
+
+- Browser layout scrolls like a normal page instead of locking to a phone-height frame
+- Wide screens use a two-column forecast (current conditions + hourly / week)
+- Corner-window popup for a small always-visible browser view
+- Downloadable always-on-top desktop widget that snaps to a screen corner
+- PWA manifest and app icon
+
+### 1.1.0 — 2026-08-12
+
+- Fixed the blank GitHub Pages site (it was serving unbuilt JSX)
+- Hourly “Now” starts on the current hour
+- Wind switches to mph with °F
+- Remembers last city and unit
+- Search cancels stale geocode requests
+- Pressure labeled in hPa
+
+### 1.0.0 — 2026-07-17
+
+- First Atmosphere release: city search, geolocation, current / hourly / 7-day
+- Glass UI with weather-based themes
+- °C / °F toggle
+- React + Vite rebuild and GitHub Pages deploy
