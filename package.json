@@ -1,7 +1,7 @@
 {
   "name": "atmosphere-weather",
   "private": true,
-  "version": "1.2.2",
+  "version": "1.2.1",
   "type": "module",
   "scripts": {
     "dev": "cp index.vite.html index.html && vite",
