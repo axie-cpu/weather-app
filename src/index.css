@@ -1,3 +1,65 @@
+@import "tailwindcss";
+
+/* Design tokens — theme classes override the weather palette */
+@theme {
+  --font-sans: Outfit, system-ui, sans-serif;
+  --font-serif: "Instrument Serif", Georgia, serif;
+  --ease-atmosphere: cubic-bezier(0.22, 1, 0.36, 1);
+  --radius-card: 22px;
+
+  --color-bg0: var(--bg0);
+  --color-bg1: var(--bg1);
+  --color-bg2: var(--bg2);
+  --color-bg3: var(--bg3);
+  --color-glow: var(--glow);
+  --color-glow2: var(--glow2);
+  --color-ink: var(--text);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-glass: var(--glass);
+  --color-glass-hi: var(--glass-hi);
+  --color-stroke: var(--stroke);
+  --color-stroke-hi: var(--stroke-hi);
+  --color-accent: var(--accent);
+  --color-danger: var(--danger);
+
+  --animate-rise: rise 0.45s var(--ease-atmosphere) both;
+  --animate-float: float 4s ease-in-out infinite;
+  --animate-pulse-dot: pulse-dot 1.3s ease infinite;
+  --animate-spin-slow: spin 1s linear infinite;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
 :root {
   --bg0: #070b14;
   --bg1: #0c1424;
@@ -14,18 +76,10 @@
   --stroke-hi: rgba(255, 255, 255, 0.22);
   --accent: #9fd0ff;
   --danger: #ff9b9b;
-  --r: 22px;
-  --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
   --safe-l: env(safe-area-inset-left, 0px);
   --safe-r: env(safe-area-inset-right, 0px);
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 html {
@@ -40,7 +94,7 @@ body,
 }
 
 body {
-  font-family: Outfit, system-ui, sans-serif;
+  font-family: var(--font-sans);
   color: var(--text);
   background: var(--bg0);
   overflow-x: hidden;
@@ -49,32 +103,17 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+button:not(:disabled) {
+  cursor: pointer;
+}
+
 body.widget-mode,
-body.widget-mode html,
 body.widget-mode #root {
   height: 100%;
   overflow: hidden;
 }
 
-button,
-input {
-  font: inherit;
-  color: inherit;
-}
-
-button {
-  cursor: pointer;
-  border: 0;
-  background: none;
-}
-
-button:not(:disabled),
-[role="button"]:not(:disabled),
-a.text-btn {
-  cursor: pointer;
-}
-
-/* Themes */
+/* Weather themes */
 body.theme-clear-day {
   --bg0: #0e2a52;
   --bg1: #1a4d8c;
@@ -140,4 +179,137 @@ body.theme-fog {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Multi-stop sky that depends on live theme tokens */
+.sky {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 90% 70% at 85% -10%, color-mix(in srgb, var(--glow) 45%, transparent), transparent 55%),
+    radial-gradient(ellipse 70% 55% at -5% 90%, color-mix(in srgb, var(--glow2) 35%, transparent), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 50% 50%, color-mix(in srgb, var(--bg3) 40%, transparent), transparent 70%),
+    linear-gradient(165deg, var(--bg0) 0%, var(--bg1) 40%, var(--bg2) 100%);
+  transition: background 0.9s var(--ease-atmosphere);
+}
+
+.sky::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.035;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Glass card sheen */
+.card-sheen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.09) 0%, transparent 45%);
+  pointer-events: none;
+}
+
+/* Brand mark orb */
+.brand-mark {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--glow), var(--glow2));
+  box-shadow: 0 0 20px color-mix(in srgb, var(--glow) 40%, transparent);
+  position: relative;
+}
+
+.brand-mark::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 3px 2px 0 -1px rgba(7, 11, 20, 0.35);
+}
+
+/* Temp gradient fill */
+.temp-gradient {
+  background: linear-gradient(180deg, #fff 30%, rgba(255, 255, 255, 0.7));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.temp-gradient sup {
+  font-size: 0.3em;
+  font-weight: 400;
+  vertical-align: super;
+  color: rgba(255, 255, 255, 0.7);
+  -webkit-text-fill-color: rgba(255, 255, 255, 0.7);
+}
+
+/* Electron widget drag regions */
+.drag-region {
+  -webkit-app-region: drag;
+  app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+
+/* Hourly “now” cell uses theme glow */
+.hour-now {
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--glow) 28%, transparent),
+    rgba(255, 255, 255, 0.06)
+  );
+  border-color: var(--stroke-hi);
+}
+
+/* Daily range bar fill */
+.day-bar-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 99px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--glow2) 70%, white), var(--glow));
+  opacity: 0.85;
+}
+
+/* Safe-area aware page padding */
+.app-pad {
+  padding-top: calc(16px + var(--safe-t));
+  padding-right: calc(18px + var(--safe-r));
+  padding-bottom: calc(18px + var(--safe-b));
+  padding-left: calc(18px + var(--safe-l));
+}
+
+.app-pad-widget {
+  padding-top: calc(6px + var(--safe-t));
+  padding-right: calc(10px + var(--safe-r));
+  padding-bottom: calc(8px + var(--safe-b));
+  padding-left: calc(10px + var(--safe-l));
+}
+
+@media (max-width: 640px) {
+  .app-pad {
+    padding-left: calc(12px + var(--safe-l));
+    padding-right: calc(12px + var(--safe-r));
+  }
+}
+
+/* Hide scrollbar on hourly strip */
+.scrollbar-none {
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-thin-soft {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
