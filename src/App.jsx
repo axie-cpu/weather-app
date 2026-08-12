@@ -37,8 +37,6 @@ export default function App() {
   const [suggestions, setSuggestions] = useState([]);
   const [activeSuggest, setActiveSuggest] = useState(-1);
   const [geoBusy, setGeoBusy] = useState(false);
-  const [refreshBusy, setRefreshBusy] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(null);
   const [pinned, setPinned] = useState(true);
   const [snapOpen, setSnapOpen] = useState(false);
   const timer = useRef(null);
@@ -48,14 +46,13 @@ export default function App() {
   const fmt = useCallback((c) => Math.round(unit === "f" ? toF(c) : c), [unit]);
   const unitSym = unit === "f" ? "°F" : "°C";
 
-  const loadPlace = useCallback(async (p, { silent } = {}) => {
+  const loadPlace = useCallback(async (p) => {
     setPlace(p);
     writeStore("wx-place", p);
-    if (!silent) setStatus({ msg: `Loading ${p.name}…`, loading: true, error: false });
+    setStatus({ msg: `Loading ${p.name}…`, loading: true, error: false });
     try {
       const data = await fetchWeather(p.latitude, p.longitude);
       setWeather(data);
-      setLastUpdated(new Date());
       setStatus({ msg: "", loading: false, error: false });
     } catch (e) {
       setStatus({ msg: e.message || "Could not load weather", loading: false, error: true });
@@ -177,17 +174,6 @@ export default function App() {
     } else if (e.key === "Escape") {
       setSuggestions([]);
       setSnapOpen(false);
-    }
-  };
-
-  const refreshWeather = async () => {
-    if (refreshBusy || status.loading) return;
-    setRefreshBusy(true);
-    setStatus({ msg: "Refreshing…", loading: true, error: false });
-    try {
-      await loadPlace(place, { silent: true });
-    } finally {
-      setRefreshBusy(false);
     }
   };
 
@@ -383,19 +369,6 @@ export default function App() {
             </div>
             <button
               type="button"
-              className={`icon-btn${refreshBusy ? " spinning" : ""}`}
-              onClick={refreshWeather}
-              disabled={refreshBusy || status.loading}
-              title="Refresh weather"
-              aria-label="Refresh weather"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 12a9 9 0 1 1-2.64-6.36" />
-                <path d="M21 3v6h-6" />
-              </svg>
-            </button>
-            <button
-              type="button"
               className={`icon-btn${geoBusy ? " spinning" : ""}`}
               onClick={useGeo}
               disabled={geoBusy}
@@ -440,13 +413,6 @@ export default function App() {
                     <div className="place">{place.name}</div>
                     <div className="place-meta">
                       {[place.admin1, place.country].filter(Boolean).join(" · ")}
-                      {lastUpdated && (
-                        <span className="updated">
-                          {[place.admin1, place.country].filter(Boolean).length ? " · " : ""}
-                          Updated{" "}
-                          {lastUpdated.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
-                        </span>
-                      )}
                     </div>
                   </div>
                   <div className="wx-badge" aria-hidden="true">
