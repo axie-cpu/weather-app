@@ -2,42 +2,49 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   DEFAULT_PLACE,
   fetchWeather,
+  hourlyStartIndex,
+  readStore,
   searchCities,
   themeClass,
   toF,
+  toMph,
   wmo,
+  writeStore,
 } from "./lib/weather";
 import "./App.css";
 
 function useUnit() {
-  const [unit, setUnit] = useState(() => localStorage.getItem("wx-unit") || "c");
+  const [unit, setUnit] = useState(() => readStore("wx-unit", "c"));
   const set = (u) => {
     setUnit(u);
-    localStorage.setItem("wx-unit", u);
+    writeStore("wx-unit", u);
   };
   return [unit, set];
 }
 
 export default function App() {
   const [unit, setUnit] = useUnit();
-  const [place, setPlace] = useState(DEFAULT_PLACE);
+  const [place, setPlace] = useState(() => readStore("wx-place", DEFAULT_PLACE));
   const [weather, setWeather] = useState(null);
-  const [status, setStatus] = useState({ msg: "Loading San Francisco…", loading: true, error: false });
+  const [status, setStatus] = useState({
+    msg: `Loading ${readStore("wx-place", DEFAULT_PLACE).name}…`,
+    loading: true,
+    error: false,
+  });
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [activeSuggest, setActiveSuggest] = useState(-1);
   const [geoBusy, setGeoBusy] = useState(false);
   const timer = useRef(null);
+  const searchAbort = useRef(null);
   const searchRef = useRef(null);
 
-  const fmt = useCallback(
-    (c) => Math.round(unit === "f" ? toF(c) : c),
-    [unit]
-  );
+  const fmt = useCallback((c) => Math.round(unit === "f" ? toF(c) : c), [unit]);
   const unitSym = unit === "f" ? "°F" : "°C";
 
   const loadPlace = useCallback(async (p) => {
     setPlace(p);
+    writeStore("wx-place", p);
     setStatus({ msg: `Loading ${p.name}…`, loading: true, error: false });
     try {
       const data = await fetchWeather(p.latitude, p.longitude);
@@ -49,7 +56,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    loadPlace(DEFAULT_PLACE);
+    loadPlace(readStore("wx-place", DEFAULT_PLACE));
   }, [loadPlace]);
 
   useEffect(() => {
@@ -65,18 +72,15 @@ export default function App() {
 
   const hours = useMemo(() => {
     if (!weather?.hourly || !weather?.current) return [];
-    const now = new Date(weather.current.time);
+    const start = hourlyStartIndex(weather.hourly.time, weather.current.time);
     const list = [];
-    for (let i = 0; i < weather.hourly.time.length && list.length < 18; i++) {
-      const t = new Date(weather.hourly.time[i]);
-      if (t >= now) {
-        list.push({
-          time: t,
-          temp: weather.hourly.temperature_2m[i],
-          code: weather.hourly.weather_code[i],
-          pop: weather.hourly.precipitation_probability[i],
-        });
-      }
+    for (let i = start; i < weather.hourly.time.length && list.length < 18; i++) {
+      list.push({
+        time: new Date(weather.hourly.time[i]),
+        temp: weather.hourly.temperature_2m[i],
+        code: weather.hourly.weather_code[i],
+        pop: weather.hourly.precipitation_probability[i],
+      });
     }
     return list;
   }, [weather]);
@@ -84,7 +88,7 @@ export default function App() {
   const days = useMemo(() => {
     if (!weather?.daily) return [];
     return weather.daily.time.map((d, i) => ({
-      date: new Date(d + "T12:00:00"),
+      date: new Date(`${d}T12:00:00`),
       code: weather.daily.weather_code[i],
       max: weather.daily.temperature_2m_max[i],
       min: weather.daily.temperature_2m_min[i],
@@ -103,15 +107,18 @@ export default function App() {
     setQuery(val);
     setActiveSuggest(-1);
     clearTimeout(timer.current);
+    searchAbort.current?.abort();
     if (val.trim().length < 2) {
       setSuggestions([]);
       return;
     }
     timer.current = setTimeout(async () => {
+      const ctrl = new AbortController();
+      searchAbort.current = ctrl;
       try {
-        setSuggestions(await searchCities(val.trim()));
-      } catch {
-        setSuggestions([]);
+        setSuggestions(await searchCities(val.trim(), ctrl.signal));
+      } catch (err) {
+        if (err?.name !== "AbortError") setSuggestions([]);
       }
     }, 260);
   };
@@ -119,7 +126,13 @@ export default function App() {
   const pickCity = (r) => {
     setSuggestions([]);
     setQuery(r.name);
-    loadPlace(r);
+    loadPlace({
+      name: r.name,
+      admin1: r.admin1 || "",
+      country: r.country || "",
+      latitude: r.latitude,
+      longitude: r.longitude,
+    });
   };
 
   const onSearchKey = async (e) => {
@@ -211,6 +224,12 @@ export default function App() {
 
   const cur = weather?.current;
   const meta = cur ? wmo(cur.weather_code) : null;
+  const wind = cur
+    ? unit === "f"
+      ? `${Math.round(toMph(cur.wind_speed_10m))}`
+      : `${Math.round(cur.wind_speed_10m)}`
+    : "";
+  const windUnit = unit === "f" ? " mph" : " km/h";
 
   return (
     <div className="shell">
@@ -273,6 +292,7 @@ export default function App() {
                 <li
                   key={`${r.id ?? r.name}-${i}`}
                   role="option"
+                  aria-selected={i === activeSuggest}
                   className={i === activeSuggest ? "active" : ""}
                   onClick={() => pickCity(r)}
                 >
@@ -327,14 +347,17 @@ export default function App() {
                     <div className="ico">💨</div>
                     <div className="k">Wind</div>
                     <div className="v">
-                      {Math.round(cur.wind_speed_10m)}
-                      <span> km/h</span>
+                      {wind}
+                      <span>{windUnit}</span>
                     </div>
                   </div>
                   <div className="stat">
                     <div className="ico">◎</div>
                     <div className="k">Pressure</div>
-                    <div className="v">{Math.round(cur.surface_pressure)}</div>
+                    <div className="v">
+                      {Math.round(cur.surface_pressure)}
+                      <span> hPa</span>
+                    </div>
                   </div>
                   <div className="stat">
                     <div className="ico">🌧</div>
@@ -355,7 +378,7 @@ export default function App() {
                   {hours.map((h, idx) => {
                     const m = wmo(h.code);
                     return (
-                      <div key={h.time.toISOString()} className={`hour${idx === 0 ? " now" : ""}`}>
+                      <div key={`${h.time.toISOString()}-${idx}`} className={`hour${idx === 0 ? " now" : ""}`}>
                         <div className="t">
                           {idx === 0 ? "Now" : h.time.toLocaleTimeString([], { hour: "numeric" })}
                         </div>

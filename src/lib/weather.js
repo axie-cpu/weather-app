@@ -37,6 +37,10 @@ export function toF(c) {
   return (c * 9) / 5 + 32;
 }
 
+export function toMph(kmh) {
+  return kmh * 0.621371;
+}
+
 export function themeClass(code, isDay) {
   const t = wmo(code).theme;
   if (t === "clear") return isDay ? "theme-clear-day" : "theme-clear-night";
@@ -47,9 +51,9 @@ export function themeClass(code, isDay) {
   return "theme-clouds";
 }
 
-export async function searchCities(q) {
+export async function searchCities(q, signal) {
   const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=6&language=en&format=json`;
-  const res = await fetch(url);
+  const res = await fetch(url, { signal });
   if (!res.ok) throw new Error("Search failed");
   const data = await res.json();
   return data.results || [];
@@ -57,8 +61,8 @@ export async function searchCities(q) {
 
 export async function fetchWeather(lat, lon) {
   const params = new URLSearchParams({
-    latitude: lat,
-    longitude: lon,
+    latitude: String(lat),
+    longitude: String(lon),
     current:
       "temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,surface_pressure,precipitation,is_day",
     hourly: "temperature_2m,weather_code,precipitation_probability",
@@ -72,6 +76,14 @@ export async function fetchWeather(lat, lon) {
   return res.json();
 }
 
+/** Pick the hourly slot at or just before the current observation time. */
+export function hourlyStartIndex(hourlyTimes, currentTime) {
+  if (!hourlyTimes?.length || !currentTime) return 0;
+  let i = 0;
+  while (i < hourlyTimes.length && hourlyTimes[i] <= currentTime) i += 1;
+  return Math.max(0, i - 1);
+}
+
 export const DEFAULT_PLACE = {
   name: "San Francisco",
   admin1: "California",
@@ -79,3 +91,21 @@ export const DEFAULT_PLACE = {
   latitude: 37.77493,
   longitude: -122.41942,
 };
+
+export function readStore(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw == null) return fallback;
+    return JSON.parse(raw);
+  } catch {
+    return fallback;
+  }
+}
+
+export function writeStore(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* private mode / quota */
+  }
+}
