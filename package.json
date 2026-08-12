@@ -1,13 +1,13 @@
 {
   "name": "atmosphere-weather",
   "private": true,
-  "version": "1.2.0",
+  "version": "1.2.1",
   "type": "module",
   "scripts": {
     "dev": "cp index.vite.html index.html && vite",
     "build": "node scripts/pack-widget.mjs && cp index.vite.html index.html && vite build && node scripts/publish-static.mjs",
     "preview": "vite preview --host 0.0.0.0 --port 8080",
-    "desktop": "npm --prefix desktop start"
+    "pin-atmosphere": "npm --prefix desktop run pin-atmosphere"
   },
   "dependencies": {
     "react": "^19.1.0",

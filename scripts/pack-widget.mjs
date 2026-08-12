@@ -16,13 +16,13 @@ const files = [
   "preload.cjs",
   "package.json",
   "README.txt",
-  "start-windows.bat",
-  "start-mac-linux.sh",
+  "pin-atmosphere.bat",
+  "pin-atmosphere.sh",
 ];
 for (const file of files) {
   copyFileSync(join(src, file), join(staging, file));
 }
-chmodSync(join(staging, "start-mac-linux.sh"), 0o755);
+chmodSync(join(staging, "pin-atmosphere.sh"), 0o755);
 
 writeFileSync(zipPath, buildZip(staging, files));
 console.log(`Wrote ${zipPath}`);

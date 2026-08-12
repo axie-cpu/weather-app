@@ -6,7 +6,8 @@ if ! command -v npm >/dev/null 2>&1; then
   exit 1
 fi
 if [ ! -d node_modules ]; then
-  echo "Installing the desktop widget..."
+  echo "Setting up Atmosphere..."
   npm install
 fi
-npm start
+echo "Pinning Atmosphere to your screen..."
+npm run pin-atmosphere

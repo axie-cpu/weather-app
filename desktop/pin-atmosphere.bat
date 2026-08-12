@@ -1,4 +1,5 @@
 @echo off
+title Pin Atmosphere
 cd /d "%~dp0"
 where npm >nul 2>nul
 if errorlevel 1 (
@@ -8,7 +9,8 @@ if errorlevel 1 (
   exit /b 1
 )
 if not exist node_modules (
-  echo Installing the desktop widget...
+  echo Setting up Atmosphere...
   call npm install
 )
-npm start
+echo Pinning Atmosphere to your screen...
+call npm run pin-atmosphere

@@ -7,14 +7,14 @@ Requirements
 ------------
 Node.js 18+ (https://nodejs.org)
 
-Start
------
-Windows:  double-click start-windows.bat
-Mac/Linux:  double-click start-mac-linux.sh
+Pin it
+------
+Windows:  double-click pin-atmosphere.bat
+Mac/Linux:  ./pin-atmosphere.sh
   or in this folder:
 
     npm install
-    npm start
+    npm run pin-atmosphere
 
 The widget loads live weather from the Atmosphere site, stays above other
 windows, and remembers its position. Use the tray icon or the title-bar

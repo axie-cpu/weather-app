@@ -1,12 +1,12 @@
 {
   "name": "atmosphere-desktop-widget",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "description": "Always-on-top Atmosphere weather widget for a desktop corner",
   "main": "main.cjs",
   "scripts": {
-    "start": "electron .",
-    "desktop": "electron ."
+    "pin-atmosphere": "electron .",
+    "start": "npm run pin-atmosphere"
   },
   "devDependencies": {
     "electron": "^37.2.6"

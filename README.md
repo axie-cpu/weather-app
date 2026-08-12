@@ -17,15 +17,15 @@ The page is a normal scrolling layout on desktop (forecast side-by-side) and sta
 
 Unzip, then:
 
-- Windows: `start-windows.bat`
-- Mac / Linux: `start-mac-linux.sh`
+- Windows: `pin-atmosphere.bat`
+- Mac / Linux: `./pin-atmosphere.sh`
 
 Needs [Node.js](https://nodejs.org). The widget stays above other windows, snaps to a corner, and remembers its place.
 
 ```bash
 cd Atmosphere-Desktop-Widget
 npm install
-npm start
+npm run pin-atmosphere
 ```
 
 ## Dev
@@ -35,9 +35,19 @@ npm install
 npm run dev
 ```
 
+To pin the desktop widget from this repo:
+
+```bash
+npm run pin-atmosphere
+```
+
 `npm run build` writes the production site (and the widget zip) to the repo root for GitHub Pages.
 
 ## Changelog
+
+### 1.2.1 — 2026-08-12
+
+- Start the desktop widget with `npm run pin-atmosphere` (or `pin-atmosphere.bat` / `./pin-atmosphere.sh`)
 
 ### 1.2.0 — 2026-08-12
 
