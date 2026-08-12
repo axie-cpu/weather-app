@@ -1,6 +1,6 @@
 # Atmosphere · Weather
 
-Full-viewport React weather app — Vite + React 19 + Open-Meteo.
+Full-viewport React weather app — Vite + React 19 + Tailwind CSS v4 + Open-Meteo.
 
 ## Live
 
@@ -44,6 +44,11 @@ npm run pin-atmosphere
 `npm run build` writes the production site (and the widget zip) to the repo root for GitHub Pages.
 
 ## Changelog
+
+### 1.3.0 — 2026-08-12
+
+- Migrated UI styles to Tailwind CSS v4 (`@tailwindcss/vite`)
+- Kept weather theme tokens and a few complex effects (sky mesh, glass sheen, temp gradient) in CSS
 
 ### 1.2.2 — 2026-08-12
 
