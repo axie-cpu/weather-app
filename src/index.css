@@ -4,7 +4,7 @@
   --bg2: #152238;
   --bg3: #1e3a5f;
   --glow: #5eb0ff;
-  --glow2: #a78bfa;
+  --glow2: #7aa2ff;
   --text: #f7f9fc;
   --muted: rgba(247, 249, 252, 0.58);
   --faint: rgba(247, 249, 252, 0.1);
@@ -28,29 +28,32 @@
   padding: 0;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 html,
 body,
 #root {
-  height: 100%;
   width: 100%;
-}
-
-html {
-  -webkit-text-size-adjust: 100%;
+  min-height: 100%;
 }
 
 body {
   font-family: Outfit, system-ui, sans-serif;
   color: var(--text);
   background: var(--bg0);
-  overflow: hidden;
-  line-height: 1.4;
+  overflow-x: hidden;
+  overflow-y: auto;
+  line-height: 1.45;
   -webkit-font-smoothing: antialiased;
 }
 
-#root {
-  min-height: 100dvh;
-  min-height: 100svh;
+body.widget-mode,
+body.widget-mode html,
+body.widget-mode #root {
+  height: 100%;
+  overflow: hidden;
 }
 
 button,
@@ -63,6 +66,12 @@ button {
   cursor: pointer;
   border: 0;
   background: none;
+}
+
+button:not(:disabled),
+[role="button"]:not(:disabled),
+a.text-btn {
+  cursor: pointer;
 }
 
 /* Themes */
@@ -121,4 +130,14 @@ body.theme-fog {
   --bg3: #8b95a5;
   --glow: #cbd5e1;
   --glow2: #94a3b8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

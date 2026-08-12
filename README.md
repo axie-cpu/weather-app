@@ -6,7 +6,27 @@ Full-viewport React weather app — Vite + React 19 + Open-Meteo.
 
 **https://axie-cpu.github.io/weather-app/**
 
-The site is published from the built files committed on `main` (`index.html` + `assets/`) because this repo’s Pages source is **Deploy from a branch → `/`**. A Vite-only source tree would stay blank (browsers cannot execute `/src/main.jsx`).
+## Browser
+
+The page is a normal scrolling layout on desktop (forecast side-by-side) and stays compact on phones.
+
+- **Corner window** — opens a small popup you can park on the side of the screen
+- **Desktop widget** — download `Atmosphere-Desktop-Widget.zip` from the page
+
+## Desktop widget (always on top)
+
+Unzip, then:
+
+- Windows: `start-windows.bat`
+- Mac / Linux: `start-mac-linux.sh`
+
+Needs [Node.js](https://nodejs.org). The widget stays above other windows, snaps to a corner, and remembers its place.
+
+```bash
+cd Atmosphere-Desktop-Widget
+npm install
+npm start
+```
 
 ## Dev
 
@@ -15,12 +35,4 @@ npm install
 npm run dev
 ```
 
-`npm run dev` swaps in `index.vite.html` (the Vite entry) locally. `npm run build` writes a production `index.html` + `assets/` at the repo root for Pages.
-
-## Features
-
-- City search + geolocation
-- Remembers last city and °C/°F
-- Current / hourly / 7-day
-- Wind in km/h or mph with the unit toggle
-- Theme shifts with weather
+`npm run build` writes the production site (and the widget zip) to the repo root for GitHub Pages.

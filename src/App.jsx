@@ -11,6 +11,7 @@ import {
   wmo,
   writeStore,
 } from "./lib/weather";
+import { detectMode, openBrowserWidget, widgetAsset } from "./lib/mode";
 import "./App.css";
 
 function useUnit() {
@@ -23,6 +24,7 @@ function useUnit() {
 }
 
 export default function App() {
+  const [{ widget, desktop }] = useState(detectMode);
   const [unit, setUnit] = useUnit();
   const [place, setPlace] = useState(() => readStore("wx-place", DEFAULT_PLACE));
   const [weather, setWeather] = useState(null);
@@ -35,6 +37,8 @@ export default function App() {
   const [suggestions, setSuggestions] = useState([]);
   const [activeSuggest, setActiveSuggest] = useState(-1);
   const [geoBusy, setGeoBusy] = useState(false);
+  const [pinned, setPinned] = useState(true);
+  const [snapOpen, setSnapOpen] = useState(false);
   const timer = useRef(null);
   const searchAbort = useRef(null);
   const searchRef = useRef(null);
@@ -60,15 +64,21 @@ export default function App() {
   }, [loadPlace]);
 
   useEffect(() => {
+    const extra = widget ? " widget-mode" : " browser-mode";
     if (!weather?.current) {
-      document.body.className = "theme-clouds";
+      document.body.className = `theme-clouds${extra}`;
       return;
     }
-    document.body.className = themeClass(
-      weather.current.weather_code,
-      weather.current.is_day === 1
-    );
-  }, [weather]);
+    document.body.className =
+      themeClass(weather.current.weather_code, weather.current.is_day === 1) + extra;
+  }, [weather, widget]);
+
+  useEffect(() => {
+    if (!desktop || !window.atmosphereDesktop?.getState) return;
+    window.atmosphereDesktop.getState().then((s) => {
+      if (s && typeof s.pinned === "boolean") setPinned(s.pinned);
+    });
+  }, [desktop]);
 
   const hours = useMemo(() => {
     if (!weather?.hourly || !weather?.current) return [];
@@ -163,6 +173,7 @@ export default function App() {
       }
     } else if (e.key === "Escape") {
       setSuggestions([]);
+      setSnapOpen(false);
     }
   };
 
@@ -217,10 +228,31 @@ export default function App() {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
         setSuggestions([]);
       }
+      if (!e.target.closest?.(".snap-menu, .chrome-btn.snap")) setSnapOpen(false);
     };
     document.addEventListener("click", close);
     return () => document.removeEventListener("click", close);
   }, []);
+
+  const downloadWidget = () => {
+    const a = document.createElement("a");
+    a.href = widgetAsset("Atmosphere-Desktop-Widget.zip");
+    a.download = "Atmosphere-Desktop-Widget.zip";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+
+  const togglePin = async () => {
+    const next = !pinned;
+    setPinned(next);
+    await window.atmosphereDesktop?.setPinned?.(next);
+  };
+
+  const snapTo = async (corner) => {
+    setSnapOpen(false);
+    await window.atmosphereDesktop?.snap?.(corner);
+  };
 
   const cur = weather?.current;
   const meta = cur ? wmo(cur.weather_code) : null;
@@ -232,9 +264,60 @@ export default function App() {
   const windUnit = unit === "f" ? " mph" : " km/h";
 
   return (
-    <div className="shell">
+    <div className={`shell${widget ? " is-widget" : " is-browser"}`}>
       <div className="sky" aria-hidden="true" />
       <div className="app">
+        {widget && (
+          <div className="widget-chrome">
+            <div className="drag-strip" aria-hidden="true">
+              Atmosphere
+            </div>
+            <div className="chrome-actions">
+              {desktop && (
+                <>
+                  <button
+                    type="button"
+                    className={`chrome-btn${pinned ? " on" : ""}`}
+                    title={pinned ? "Unpin from top" : "Keep on top"}
+                    onClick={togglePin}
+                  >
+                    {pinned ? "Pinned" : "Pin"}
+                  </button>
+                  <div className="snap-wrap">
+                    <button
+                      type="button"
+                      className="chrome-btn snap"
+                      title="Snap to corner"
+                      onClick={() => setSnapOpen((v) => !v)}
+                    >
+                      Corner
+                    </button>
+                    {snapOpen && (
+                      <div className="snap-menu" role="menu">
+                        <button type="button" onClick={() => snapTo("tl")}>Top left</button>
+                        <button type="button" onClick={() => snapTo("tr")}>Top right</button>
+                        <button type="button" onClick={() => snapTo("bl")}>Bottom left</button>
+                        <button type="button" onClick={() => snapTo("br")}>Bottom right</button>
+                      </div>
+                    )}
+                  </div>
+                  <button type="button" className="chrome-btn" title="Hide" onClick={() => window.atmosphereDesktop.hide()}>
+                    –
+                  </button>
+                  <button type="button" className="chrome-btn danger" title="Quit" onClick={() => window.atmosphereDesktop.close()}>
+                    ×
+                  </button>
+                </>
+              )}
+              {!desktop && (
+                <button type="button" className="chrome-btn" title="Download desktop widget" onClick={downloadWidget}>
+                  Download
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         <header className="topbar">
           <div className="brand">
             <div className="brand-mark" aria-hidden="true" />
@@ -242,13 +325,25 @@ export default function App() {
               Atmosphere <em>weather</em>
             </h1>
           </div>
-          <div className="unit-toggle" role="group" aria-label="Temperature unit">
-            <button type="button" className={unit === "c" ? "active" : ""} onClick={() => setUnit("c")}>
-              °C
-            </button>
-            <button type="button" className={unit === "f" ? "active" : ""} onClick={() => setUnit("f")}>
-              °F
-            </button>
+          <div className="top-actions">
+            {!widget && (
+              <>
+                <button type="button" className="text-btn" onClick={openBrowserWidget}>
+                  Corner window
+                </button>
+                <button type="button" className="text-btn primary" onClick={downloadWidget}>
+                  Desktop widget
+                </button>
+              </>
+            )}
+            <div className="unit-toggle" role="group" aria-label="Temperature unit">
+              <button type="button" className={unit === "c" ? "active" : ""} onClick={() => setUnit("c")}>
+                °C
+              </button>
+              <button type="button" className={unit === "f" ? "active" : ""} onClick={() => setUnit("f")}>
+                °F
+              </button>
+            </div>
           </div>
         </header>
 
@@ -370,7 +465,7 @@ export default function App() {
                 </div>
               </section>
 
-              <section className="card panel">
+              <section className="card panel hourly-panel">
                 <div className="panel-head">
                   <h2>Hourly</h2>
                 </div>
@@ -391,7 +486,7 @@ export default function App() {
                 </div>
               </section>
 
-              <section className="card panel">
+              <section className="card panel daily-panel">
                 <div className="panel-head">
                   <h2>This week</h2>
                 </div>
@@ -424,6 +519,23 @@ export default function App() {
             </>
           )}
         </div>
+
+        {!widget && (
+          <aside className="dock-card">
+            <div>
+              <strong>Keep it on your desktop</strong>
+              <p>Download the always-on-top widget. It parks in a screen corner and stays visible while you work.</p>
+            </div>
+            <div className="dock-actions">
+              <button type="button" className="text-btn" onClick={openBrowserWidget}>
+                Try a corner window
+              </button>
+              <a className="text-btn primary" href={widgetAsset("Atmosphere-Desktop-Widget.zip")} download="Atmosphere-Desktop-Widget.zip">
+                Download widget
+              </a>
+            </div>
+          </aside>
+        )}
 
         <footer className="foot">
           Powered by{" "}
