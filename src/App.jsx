@@ -51,6 +51,8 @@ export default function App() {
   const [suggestions, setSuggestions] = useState([]);
   const [activeSuggest, setActiveSuggest] = useState(-1);
   const [geoBusy, setGeoBusy] = useState(false);
+  const [refreshBusy, setRefreshBusy] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
   const [pinned, setPinned] = useState(true);
   const [snapOpen, setSnapOpen] = useState(false);
   const timer = useRef(null);
@@ -60,13 +62,14 @@ export default function App() {
   const fmt = useCallback((c) => Math.round(unit === "f" ? toF(c) : c), [unit]);
   const unitSym = unit === "f" ? "°F" : "°C";
 
-  const loadPlace = useCallback(async (p) => {
+  const loadPlace = useCallback(async (p, { silent } = {}) => {
     setPlace(p);
     writeStore("wx-place", p);
-    setStatus({ msg: `Loading ${p.name}…`, loading: true, error: false });
+    if (!silent) setStatus({ msg: `Loading ${p.name}…`, loading: true, error: false });
     try {
       const data = await fetchWeather(p.latitude, p.longitude);
       setWeather(data);
+      setLastUpdated(new Date());
       setStatus({ msg: "", loading: false, error: false });
     } catch (e) {
       setStatus({ msg: e.message || "Could not load weather", loading: false, error: true });
@@ -188,6 +191,17 @@ export default function App() {
     } else if (e.key === "Escape") {
       setSuggestions([]);
       setSnapOpen(false);
+    }
+  };
+
+  const refreshWeather = async () => {
+    if (refreshBusy || status.loading) return;
+    setRefreshBusy(true);
+    setStatus({ msg: "Refreshing…", loading: true, error: false });
+    try {
+      await loadPlace(place, { silent: true });
+    } finally {
+      setRefreshBusy(false);
     }
   };
 
@@ -454,6 +468,29 @@ export default function App() {
             <button
               type="button"
               className={iconBtn}
+              onClick={refreshWeather}
+              disabled={refreshBusy || status.loading}
+              title="Refresh weather"
+              aria-label="Refresh weather"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={refreshBusy ? "animate-spin-slow" : undefined}
+              >
+                <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+                <path d="M21 3v6h-6" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              className={iconBtn}
               onClick={useGeo}
               disabled={geoBusy}
               title="Use my location"
@@ -476,7 +513,7 @@ export default function App() {
           </div>
           {suggestions.length > 0 && (
             <ul
-              className="list-none absolute left-0 right-[54px] top-[calc(100%+6px)] z-30 bg-[rgba(10,14,26,0.92)] border border-stroke rounded-2xl overflow-hidden backdrop-blur-[24px] shadow-[0_16px_48px_rgba(0,0,0,0.35)] max-h-[min(240px,35dvh)] overflow-y-auto"
+              className="list-none absolute left-0 right-[108px] top-[calc(100%+6px)] z-30 bg-[rgba(10,14,26,0.92)] border border-stroke rounded-2xl overflow-hidden backdrop-blur-[24px] shadow-[0_16px_48px_rgba(0,0,0,0.35)] max-h-[min(240px,35dvh)] overflow-y-auto"
               role="listbox"
             >
               {suggestions.map((r, i) => (
@@ -537,6 +574,13 @@ export default function App() {
                     </div>
                     <div className="text-muted text-[0.8rem] mt-1">
                       {[place.admin1, place.country].filter(Boolean).join(" · ")}
+                      {lastUpdated && (
+                        <span className="updated">
+                          {[place.admin1, place.country].filter(Boolean).length ? " · " : ""}
+                          Updated{" "}
+                          {lastUpdated.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div

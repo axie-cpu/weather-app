@@ -50,6 +50,11 @@ npm run pin-atmosphere
 - Migrated UI styles to Tailwind CSS v4 (`@tailwindcss/vite`)
 - Kept weather theme tokens and a few complex effects (sky mesh, glass sheen, temp gradient) in CSS
 
+### 1.2.2 — 2026-08-12
+
+- Refresh button reloads the current city's forecast without re-searching
+- Shows the last update time under the place name
+
 ### 1.2.1 — 2026-08-12
 
 - Start the desktop widget with `npm run pin-atmosphere` (or `pin-atmosphere.bat` / `./pin-atmosphere.sh`)
