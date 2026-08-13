@@ -2,6 +2,8 @@
 
 Full-viewport React weather app — Vite + React 19 + Tailwind CSS v4 + Open-Meteo.
 
+[![CI](https://github.com/axie-cpu/weather-app/actions/workflows/ci.yml/badge.svg)](https://github.com/axie-cpu/weather-app/actions/workflows/ci.yml)
+
 ## Live
 
 **https://axie-cpu.github.io/weather-app/**
@@ -33,7 +35,10 @@ npm run pin-atmosphere
 ```bash
 npm install
 npm run dev
+npm test
 ```
+
+Pull requests run **Build & test** (unit tests + production build) via GitHub Actions.
 
 To pin the desktop widget from this repo:
 

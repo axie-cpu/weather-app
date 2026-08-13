@@ -7,7 +7,8 @@
     "dev": "cp index.vite.html index.html && vite",
     "build": "node scripts/pack-widget.mjs && cp index.vite.html index.html && vite build && node scripts/publish-static.mjs",
     "preview": "vite preview --host 0.0.0.0 --port 8080",
-    "pin-atmosphere": "npm --prefix desktop run pin-atmosphere"
+    "pin-atmosphere": "npm --prefix desktop run pin-atmosphere",
+    "test": "node --test src/lib/weather.test.js"
   },
   "dependencies": {
     "react": "^19.1.0",
