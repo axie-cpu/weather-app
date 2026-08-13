@@ -45,6 +45,11 @@ npm run pin-atmosphere
 
 ## Changelog
 
+### 1.3.1 — 2026-08-12
+
+- Default idle palette is green (from #6), rebased onto the Tailwind UI
+- Refresh + last-updated from #1 stay in place
+
 ### 1.3.0 — 2026-08-12
 
 - Migrated UI styles to Tailwind CSS v4 (`@tailwindcss/vite`)
