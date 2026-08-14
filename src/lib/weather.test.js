@@ -54,3 +54,7 @@ test("DEFAULT_PLACE is San Francisco", () => {
   assert.equal(typeof DEFAULT_PLACE.latitude, "number");
   assert.equal(typeof DEFAULT_PLACE.longitude, "number");
 });
+
+test("DEFAULT_PLACE has a country code", () => {
+  assert.ok(DEFAULT_PLACE.country || DEFAULT_PLACE.country_code || DEFAULT_PLACE.admin1);
+});
