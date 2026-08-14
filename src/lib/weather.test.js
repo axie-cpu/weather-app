@@ -13,6 +13,7 @@ test("toF converts Celsius to Fahrenheit", () => {
   assert.equal(toF(0), 32);
   assert.equal(toF(100), 212);
   assert.equal(toF(-40), -40);
+  assert.equal(toF(20), 68);
 });
 
 test("toMph converts km/h to mph", () => {
