@@ -103,5 +103,6 @@ test("DEFAULT_PLACE has region country and SF coordinates", () => {
 });
 
 test("DEFAULT_PLACE name is non-empty", () => {
+  assert.equal(typeof DEFAULT_PLACE.name, "string");
   assert.ok(DEFAULT_PLACE.name.length > 0);
 });
