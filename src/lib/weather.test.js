@@ -101,3 +101,7 @@ test("DEFAULT_PLACE has region country and SF coordinates", () => {
   assert.ok(DEFAULT_PLACE.latitude > 37 && DEFAULT_PLACE.latitude < 38);
   assert.ok(DEFAULT_PLACE.longitude < -122 && DEFAULT_PLACE.longitude > -123);
 });
+
+test("DEFAULT_PLACE name is non-empty", () => {
+  assert.ok(DEFAULT_PLACE.name.length > 0);
+});
